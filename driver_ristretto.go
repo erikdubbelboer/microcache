@@ -51,29 +51,47 @@ func NewDriverRistretto(requests, size int64) DriverRistretto {
 }
 
 func (d DriverRistretto) SetRequestOpts(hash string, req RequestOpts) error {
+	req.hash = hash
 	d.Cache.Set(hash, req, requestOptsSize)
 	return nil
 }
 
-func (d DriverRistretto) GetRequestOpts(hash string) (req RequestOpts) {
+func (d DriverRistretto) GetRequestOpts(hash string) (req RequestOpts, collision bool) {
 	r, ok := d.Cache.Get(hash)
 	if ok && r != nil {
-		req = r.(RequestOpts)
+		req, ok = r.(RequestOpts)
+		if !ok {
+			_, ok := r.(Response)
+			if ok {
+				return req, true
+			}
+		} else if req.hash != hash {
+			return req, true
+		}
 	}
-	return req
+	return req, false
 }
 
 func (d DriverRistretto) Set(hash string, res Response) error {
+	res.hash = hash
 	d.Cache.Set(hash, res, calculateResponseCost(res))
 	return nil
 }
 
-func (d DriverRistretto) Get(hash string) (res Response) {
+func (d DriverRistretto) Get(hash string) (res Response, collision bool) {
 	r, ok := d.Cache.Get(hash)
 	if ok && r != nil {
-		res = r.(Response)
+		res, ok = r.(Response)
+		if !ok {
+			_, ok := r.(RequestOpts)
+			if ok {
+				return res, true
+			}
+		} else if res.hash != hash {
+			return res, true
+		}
 	}
-	return res
+	return res, false
 }
 
 func (d DriverRistretto) Remove(hash string) error {

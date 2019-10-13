@@ -38,12 +38,12 @@ func (c DriverARC) SetRequestOpts(hash string, req RequestOpts) error {
 	return nil
 }
 
-func (c DriverARC) GetRequestOpts(hash string) (req RequestOpts) {
+func (c DriverARC) GetRequestOpts(hash string) (req RequestOpts, collision bool) {
 	obj, success := c.RequestCache.Get(hash)
 	if success {
 		req = obj.(RequestOpts)
 	}
-	return req
+	return req, false
 }
 
 func (c DriverARC) Set(hash string, res Response) error {
@@ -51,12 +51,12 @@ func (c DriverARC) Set(hash string, res Response) error {
 	return nil
 }
 
-func (c DriverARC) Get(hash string) (res Response) {
+func (c DriverARC) Get(hash string) (res Response, collision bool) {
 	obj, success := c.ResponseCache.Get(hash)
 	if success {
 		res = obj.(Response)
 	}
-	return res
+	return res, false
 }
 
 func (c DriverARC) Remove(hash string) error {

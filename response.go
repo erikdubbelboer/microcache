@@ -16,6 +16,8 @@ type Response struct {
 	headerWritten bool
 	header        http.Header
 	body          []byte
+
+	hash string
 }
 
 func (res *Response) Write(b []byte) (int, error) {

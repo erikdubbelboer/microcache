@@ -198,7 +198,13 @@ func (m *microcache) Middleware(h http.Handler) http.Handler {
 
 		// Fetch request options
 		reqHash := getRequestHash(m, r)
-		req := m.Driver.GetRequestOpts(reqHash)
+		req, collision := m.Driver.GetRequestOpts(reqHash)
+
+		if collision {
+			if m.Monitor != nil {
+				m.Monitor.Collision()
+			}
+		}
 
 		// Hard passthrough on non cacheable requests
 		if req.nocache {
@@ -229,7 +235,12 @@ func (m *microcache) Middleware(h http.Handler) http.Handler {
 				m.collapseMutex.Unlock()
 			}()
 			if !req.found {
-				req = m.Driver.GetRequestOpts(reqHash)
+				req, collision = m.Driver.GetRequestOpts(reqHash)
+				if collision {
+					if m.Monitor != nil {
+						m.Monitor.Collision()
+					}
+				}
 			}
 		}
 
@@ -238,7 +249,12 @@ func (m *microcache) Middleware(h http.Handler) http.Handler {
 		var obj Response
 		if req.found {
 			objHash = req.getObjectHash(reqHash, r)
-			obj = m.Driver.Get(objHash)
+			obj, collision = m.Driver.Get(objHash)
+			if collision {
+				if m.Monitor != nil {
+					m.Monitor.Collision()
+				}
+			}
 			if m.Compressor != nil {
 				obj = m.Compressor.Expand(obj)
 			}

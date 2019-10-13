@@ -44,6 +44,8 @@ type RequestOpts struct {
 	vary                 []string
 	varyQuery            []string
 	nocache              bool
+
+	hash string
 }
 
 func (req *RequestOpts) getObjectHash(reqHash string, r *http.Request) string {

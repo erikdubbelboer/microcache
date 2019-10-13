@@ -8,14 +8,14 @@ type Driver interface {
 	SetRequestOpts(string, RequestOpts) error
 
 	// GetRequestOpts retrieves request options from the request cache
-	GetRequestOpts(string) RequestOpts
+	GetRequestOpts(string) (RequestOpts, bool)
 
 	// Set stores a response object in the response cache.
 	// This contains the full response as well as an expiration date.
 	Set(string, Response) error
 
 	// Get retrieves a response object from the response cache
-	Get(string) Response
+	Get(string) (Response, bool)
 
 	// Remove removes a response object from the response cache.
 	// Required by HTTP spec to purge cached responses after successful unsafe request.

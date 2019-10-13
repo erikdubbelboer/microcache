@@ -14,14 +14,15 @@ func MonitorFunc(interval time.Duration, logFunc func(Stats)) *monitorFunc {
 }
 
 type monitorFunc struct {
-	interval time.Duration
-	logFunc  func(Stats)
-	hits     int64
-	misses   int64
-	stales   int64
-	backend  int64
-	errors   int64
-	stop     chan bool
+	interval   time.Duration
+	logFunc    func(Stats)
+	hits       int64
+	misses     int64
+	stales     int64
+	backend    int64
+	errors     int64
+	collisions int64
+	stop       chan bool
 }
 
 func (m *monitorFunc) GetInterval() time.Duration {
@@ -43,6 +44,9 @@ func (m *monitorFunc) Log(stats Stats) {
 
 	// errors
 	stats.Errors = int(atomic.SwapInt64(&m.errors, 0))
+
+	// collisions
+	stats.Collisions = int(atomic.SwapInt64(&m.collisions, 0))
 
 	// log
 	m.logFunc(stats)
@@ -66,6 +70,10 @@ func (m *monitorFunc) Backend() {
 
 func (m *monitorFunc) Error() {
 	atomic.AddInt64(&m.errors, 1)
+}
+
+func (m *monitorFunc) Collision() {
+	atomic.AddInt64(&m.collisions, 1)
 }
 
 func (m *monitorFunc) getHits() int {
