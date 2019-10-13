@@ -1,4 +1,4 @@
-module github.com/kevburnsjr/microcache
+module github.com/erikdubbelboer/microcache
 
 go 1.13
 
