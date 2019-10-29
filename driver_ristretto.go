@@ -41,7 +41,7 @@ func NewDriverRistretto(requests, size int64) DriverRistretto {
 		NumCounters: requests * 10,
 		MaxCost:     size,
 		BufferItems: 64,
-		Metrics:     false,
+		Metrics:     true,
 	})
 	if err != nil {
 		panic(err)
@@ -100,5 +100,5 @@ func (d DriverRistretto) Remove(hash string) error {
 }
 
 func (d DriverRistretto) GetSize() int {
-	return -1
+	return int(d.Cache.Metrics.KeysAdded() - d.Cache.Metrics.KeysEvicted())
 }
