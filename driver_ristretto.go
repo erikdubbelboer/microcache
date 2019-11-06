@@ -17,7 +17,10 @@ type DriverRistretto struct {
 }
 
 func calculateResponseCost(res Response) int64 {
-	s := int64(0)
+	s := responseSize
+
+	// Estimate size of the map itself.
+	s += 5*8 + int64(len(res.header)*8)
 
 	for k, vv := range res.header {
 		s += int64(len(k))
@@ -26,8 +29,23 @@ func calculateResponseCost(res Response) int64 {
 		}
 	}
 
-	s += int64(len(res.body))
-	s += responseSize
+	s += int64(cap(res.body))
+	s += int64(len(res.hash))
+
+	return s
+}
+
+func calculateRequestOptCost(req RequestOpts) int64 {
+	s := requestOptsSize
+
+	for _, v := range req.vary {
+		s += int64(len(v))
+	}
+	for _, v := range req.varyQuery {
+		s += int64(len(v))
+	}
+
+	s += int64(len(req.hash))
 
 	return s
 }
@@ -52,7 +70,7 @@ func NewDriverRistretto(requests, size int64) DriverRistretto {
 
 func (d DriverRistretto) SetRequestOpts(hash string, req RequestOpts) error {
 	req.hash = hash
-	d.Cache.Set(hash, req, requestOptsSize)
+	d.Cache.Set(hash, req, calculateRequestOptCost(req))
 	return nil
 }
 
