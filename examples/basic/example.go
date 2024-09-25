@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/kevburnsjr/microcache"
+	"github.com/erikdubbelboer/microcache"
 )
 
 func main() {

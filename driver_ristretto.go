@@ -13,7 +13,7 @@ var (
 
 // DriverRistretto is a driver implementation using github.com/dgraph-io/ristretto
 type DriverRistretto struct {
-	Cache *ristretto.Cache
+	Cache *ristretto.Cache[string, any]
 }
 
 func calculateResponseCost(res Response) int64 {
@@ -55,7 +55,7 @@ func calculateRequestOptCost(req RequestOpts) int64 {
 // Estimating this on the higher side is better.
 // size determines the maximum number of bytes in the cache.
 func NewDriverRistretto(requests, size int64) DriverRistretto {
-	cache, err := ristretto.NewCache(&ristretto.Config{
+	cache, err := ristretto.NewCache[string, any](&ristretto.Config[string, any]{
 		NumCounters: requests * 10,
 		MaxCost:     size,
 		BufferItems: 64,
